@@ -1,13 +1,14 @@
 from shutil import copyfile
 import csv
 import os
-import string
+import datetime
+
 
 class CopyFile(object):
     def __init__(self):
         # Define o caminho onde o dataset está.
         self.PATH = '/media/sf_paulo/RNP/dataset/X-ray-chest'
-        self.data_path = self.PATH + '/images_001'
+        self.data_path = self.PATH #+ '/images_001'
         self.data_dir_list = os.listdir(self.data_path)
 
         self.imagens = []
@@ -31,7 +32,7 @@ class CopyFile(object):
 
     def copy_file(self):
         #self.classe = ""
-        classe = 'teste'
+        #classe = 'a'
         for dataset in self.data_dir_list:
 
             # Carrega as imagens do diretório.
@@ -44,9 +45,9 @@ class CopyFile(object):
                 # Recupera o índice da imagem na lista de imagens.
                 image_index = self.imagens.index(img)
                 # Recupera a classe correspondente à imagem recuperada acima.
-                self.classe = self.classes[image_index]
+                classe1 = self.classes[image_index]
 
-                classe.replace("|", "-")
+                classe = classe1.replace("|", "-")
                 #Monta o diretorio onde será gravada a imagem (com o nome da classe).
                 dst_dir = self.data_path + '/' + dataset + '/' + classe
                 #Monta o diretório e o nome de destino da imagem.
@@ -58,6 +59,8 @@ class CopyFile(object):
                 copyfile(src, dst)
 
 
+print('Inicio:', datetime.datetime.now())
 x = CopyFile()
 x.open_CSV()
 x.copy_file()
+print('Fim:', datetime.datetime.now())
