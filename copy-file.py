@@ -8,7 +8,7 @@ class CopyFile(object):
     def __init__(self):
         # Define o caminho onde o dataset está.
         self.PATH = '/media/sf_paulo/RNP/dataset/X-ray-chest'
-        self.data_path = self.PATH #+ '/images_001'
+        self.data_path = self.PATH + '/imagens'
         self.data_dir_list = os.listdir(self.data_path)
 
         self.imagens = []

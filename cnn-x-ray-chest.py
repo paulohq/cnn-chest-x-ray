@@ -27,7 +27,7 @@ class CNN_XRayChest(object):
 	def __init__ (self):
 		#Define o caminho onde o dataset está.
 		self.PATH = '/media/sf_paulo/RNP/dataset/X-ray-chest'
-		self.data_path = self.PATH + '/images_001'
+		self.data_path = self.PATH + '/dataset-xray'
 		self.data_dir_list = os.listdir(self.data_path)
 
 		self.img_rows = 128
@@ -46,24 +46,31 @@ class CNN_XRayChest(object):
 		self.labels = []
 		
 		# Define o número de classes classes
-		self.num_classes = 16
+		self.num_classes = 5
 		#Define um dicionário com as classes e seus valores.
-		self.classes = {'Atelectasis': 1,
-					    'Cardiomegaly': 2,
-					    'Effusion': 3,
-					    'Infiltration': 4,
-					    'Mass': 5,
-					    'Nodule': 6,
-					    'Pneumonia': 7,
-					    'Pneumothorax': 8,
-					    'Consolidation': 9,
-					    'Edema': 10,
-					    'Emphysema': 11,
-					    'Fibrosis': 12,
-					    'Pleural_Thickening': 13,
-					    'Hernia': 14,
-					    'No Finding': 15,
-						'Muliple': 0}
+		self.classes = {'Atelectasis': 0,  # 4212 *
+						'Effusion': 1,  # 3959 *
+						'Infiltration': 2,  # 9551 *
+						'Nodule': 3,  # 2706 *
+						'Pneumothorax': 4  # 2199 *
+						}
+		#self.classes1 = {'Atelectasis': 1,			#4212 *
+					    #'Cardiomegaly': 2,			#1094
+		#			    'Effusion': 3,				#3959 *
+	    #			    'Infiltration': 4,			#9551 *
+					    #'Mass': 5,					#2138
+		#			    'Nodule': 6,				#2706 *
+					    #'Pneumonia': 7,				#307
+		#			    'Pneumothorax': 8,			#2199 *
+					    #'Consolidation': 9,			#1314
+					    #'Edema': 10,				#634
+					    #'Emphysema': 11,			#895
+					    #'Fibrosis': 12,				#727
+					    #'Pleural_Thickening': 13,   #1127
+					    #'Hernia': 14,				#110
+					    #'No Finding': 15,			#60412
+						#'Muliple': 0
+		#			   }
 		#Define os vetores que receberão os datasets de treinamento e teste (imagens e rótulos).
 		self.X_train = []
 		self.X_test = []
@@ -76,7 +83,7 @@ class CNN_XRayChest(object):
 		#Define o modelo sequencial
 		self.model = Sequential()
 		#Define o tamanho do batch.
-		self.batch_size = 10
+		self.batch_size = 100
 		# variável que guarda valores de perda de treinamento (loss) e métricas (acurácia) em épocas sucessivas,
 		# bem como valores de perda de validação e valores de métrica de validação(se aplicável).
 		self.history = []
