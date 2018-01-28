@@ -34,7 +34,7 @@ class CNN_XRayChest(object):
 		self.img_cols = 128
 		self.num_channel = 1
 		#Número de épocas do modelo
-		self.num_epoch = 5
+		self.num_epoch = 50
 		self.validation_split = 0.2
 
 		#Lista com as imagens do dataset
@@ -117,7 +117,7 @@ class CNN_XRayChest(object):
 
 		#Recupera a quantidade de imagens do vetor img_data.
 		numero_de_imagens = self.img_data.shape[0]
-		numero_de_imagens = 1000
+		numero_de_imagens = 10000
 		#Seta array de rótulos com a quantidade de imagens.
 		self.labels = np.ones((numero_de_imagens,), dtype='int64')
 		i = 0
