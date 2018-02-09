@@ -1,0 +1,33 @@
+!pip install -U -q PyDrive
+
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+from google.colab import auth
+from oauth2client.client import GoogleCredentials
+
+auth.authenticate_user()
+gauth = GoogleAuth()
+gauth.credentials = GoogleCredentials.get_application_default()
+drive = GoogleDrive(gauth)
+
+file_id = '1TpDLoNYACTp-_J_XQ6LM2rfN4sZj2unF'
+downloaded = drive.CreateFile({'id': file_id})
+downloaded.GetContentFile('image-class.csv')
+#id data-5000
+#file_id_data = '1uPflmDmn-NeDYHvYcIb8bQ2b8cUyiVjj'
+# id data-10000
+file_id_data = '1pIn9Rth_ydmKJLfGNPFzsGJRVHADfSaa'
+downloaded = drive.CreateFile({'id': file_id_data})
+downloaded.GetContentFile('data-10000.zip')
+
+#%ls /content
+#!rm /content/data-10000/data/data-10000.zip
+#!mkdir /content/data-10000
+#!mkdir /content/data-10000/data
+#!mv /content/data-10000/data/data-10000.zip /content
+#!unzip /content/data-10000.zip
+!mv /content/data/*.png /content/data-10000/data
+
+!apt-get -qq install -y libsm6 libxext6 && pip install -q -U opencv-python
+# https://keras.io/
+!pip install -q keras

@@ -26,15 +26,15 @@ import csv
 class CNN_XRayChest(object):
 	def __init__ (self):
 		#Define o caminho onde o dataset está.
-		self.PATH = '/media/sf_paulo/RNP/dataset/X-ray-chest'
-		self.data_path = self.PATH + '/dataset-xray'
+		self.PATH = '/content'
+		self.data_path = self.PATH + '/data-5000'
 		self.data_dir_list = os.listdir(self.data_path)
 
 		self.img_rows = 128
 		self.img_cols = 128
 		self.num_channel = 1
 		#Número de épocas do modelo
-		self.num_epoch = 50
+		self.num_epoch = 100
 		self.validation_split = 0.2
 
 		#Lista com as imagens do dataset
@@ -95,7 +95,7 @@ class CNN_XRayChest(object):
 
 	def open_CSV(self):
 		#Abre arquivo csv com o nome das imagens e suas respectivas classes.
-		with open('/media/sf_paulo/RNP/dataset/X-ray-chest/image-class.csv', newline='') as csvfile:
+		with open('/content/image-class.csv', newline='') as csvfile:
 			reader = csv.DictReader(csvfile)
 			i = 0
 			# define um dicionario para armazenar o nome das imagens e as suas respectivas classes do arquivo csv.
@@ -117,7 +117,7 @@ class CNN_XRayChest(object):
 
 		#Recupera a quantidade de imagens do vetor img_data.
 		numero_de_imagens = self.img_data.shape[0]
-		numero_de_imagens = 10000
+		numero_de_imagens = 5000
 		#Seta array de rótulos com a quantidade de imagens.
 		self.labels = np.ones((numero_de_imagens,), dtype='int64')
 		i = 0
