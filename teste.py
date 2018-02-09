@@ -18,8 +18,6 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.optimizers import SGD, Adam, RMSprop, Nadam
-from keras.layers.normalization import BatchNormalization
-from keras import regularizers
 
 import datetime
 
@@ -41,9 +39,8 @@ class CNN_XRayChest(object):
         # Define o tamanho do batch.
         self.batch_size = 50
         # Tamanho dos dados de validacao
-        self.validation_split = 0.2
+        self.validation_split = 0.3
         # otimizador
-        #self.otimizador = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
         self.otimizador = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0005, amsgrad=True)
         # self.otimizador = Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
         # Lista com as imagens do dataset
@@ -220,18 +217,16 @@ class CNN_XRayChest(object):
 
     def create_model1(self):
         # Método que cria o modelo da rede com suas camadas (arquitetura da rede).
-        reg = 0.001
+
         # padding='same' inclui uma borda na imagem de entrada para que a saída seja do mesmo tamanho da entrada após aplicado o fitro.
         # padding='valid' sem padding (a imagem de sáida será diminuída em relação à imagem de entrada).
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
         self.model.add(
-            Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel),  kernel_regularizer=regularizers.l2(reg)))
-        self.model.add(BatchNormalization())
+            Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel)))
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        self.model.add(Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
-        #self.model.add(BatchNormalization())
+        self.model.add(Conv2D(32, (3, 3), padding='same'))
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada de pooling para dividir pela metade a saída da camada anterior.
@@ -240,25 +235,22 @@ class CNN_XRayChest(object):
         self.model.add(Dropout(0.25))
 
         # Cria camada convolucional com 64 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        #self.model.add(Conv2D(64, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
-        #self.model.add(BatchNormalization())
+        self.model.add(Conv2D(64, (3, 3), padding='same'))
         # Cria camada com função de ativação ReLU.
-        #self.model.add(Activation('relu'))
+        self.model.add(Activation('relu'))
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        #self.model.add(Conv2D(64, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
-        #self.model.add(BatchNormalization())
+        self.model.add(Conv2D(64, (3, 3)))
         # Cria camada com função de ativação ReLU.
-        #self.model.add(Activation('relu'))
+        self.model.add(Activation('relu'))
         # Cria camada de pooling para dividir pela metade a saída da camada anterior.
-        #self.model.add(MaxPooling2D(pool_size=(2, 2)))
+        self.model.add(MaxPooling2D(pool_size=(2, 2)))
         # Cria camada de dropout para desligar neurônios.
-        #self.model.add(Dropout(0.25))
+        self.model.add(Dropout(0.25))
 
         # Converte as os mapas de características 3D para vetores de características (1D).
         self.model.add(Flatten())
         # Cria camada densa (fully connected) com 512 neurônios.
-        self.model.add(Dense(512, kernel_regularizer=regularizers.l2(reg)))
-        self.model.add(BatchNormalization())
+        self.model.add(Dense(512))
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada de dropout para desligar neurônios.
