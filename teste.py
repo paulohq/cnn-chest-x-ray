@@ -1,47 +1,24 @@
-# Importa bibliotecas
-from numpy.random import seed
-
-seed(7)  # Define uma semente para a reprodutibilidade dos resultados do modelo.
-import os, cv2
-import numpy as np
-import matplotlib.pyplot as plt
-
-from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
-
-from keras import backend as K
-# K.set_image_dim_ordering('th')
-
-from keras.utils import np_utils
-from keras.models import Sequential
-
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.optimizers import SGD, Adam, RMSprop, Nadam
-
-import datetime
-
-import csv
 
 
 class CNN_XRayChest(object):
     def __init__(self):
         # Define o caminho onde o dataset está.
         self.PATH = '/content'
-        self.data_path = self.PATH + '/data-10000'
+        self.data_path = self.PATH + '/data-5000'
         self.data_dir_list = os.listdir(self.data_path)
 
-        self.img_rows = 128
-        self.img_cols = 128
+        self.img_rows = 512
+        self.img_cols = 512
         self.num_channel = 1
         # Número de épocas do modelo
         self.num_epoch = 50
         # Define o tamanho do batch.
         self.batch_size = 50
         # Tamanho dos dados de validacao
-        self.validation_split = 0.3
+        self.validation_split = 0.2
         # otimizador
-        self.otimizador = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0005, amsgrad=True)
+        self.otimizador = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+        #self.otimizador = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0005, amsgrad=True)
         # self.otimizador = Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
         # Lista com as imagens do dataset
         self.img_data_list = []
@@ -122,9 +99,9 @@ class CNN_XRayChest(object):
 
         # Recupera a quantidade de imagens do vetor img_data.
         numero_de_imagens = self.img_data.shape[0]
-        numero_de_imagens = 10000
+        numero_de_imagens = 5000
         # Seta array de rótulos com a quantidade de imagens.
-        self.labels = np.ones((numero_de_imagens,), dtype='int64')
+        self.labels = np.ones((numero_de_imagens,), dtype='float')
         i = 0
         # Carrega as imagens do dataset.
         # Laço que percorre o diretório com as imagens do dataset.
@@ -180,10 +157,15 @@ class CNN_XRayChest(object):
                 print(self.img_data.shape)
 
     def split_dataset(self):
+        print('aquii')
         # Embaralha o dataset
-        x, y = shuffle(self.img_data, self.Y, random_state=2)
+        #self.x, self.y = shuffle(self.img_data, self.Y, random_state=2)
+        self.x = self.img_data
+        self.y = self.Y
+        print('aquiie')
         # Divide o dataset em treinamento e teste, sendo 20% para teste.
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.2, random_state=2)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.x, self.y, test_size=0.2, random_state=2)
+        print('aquia')
 
     def create_model(self):
         # Cria o modelo
@@ -217,40 +199,47 @@ class CNN_XRayChest(object):
 
     def create_model1(self):
         # Método que cria o modelo da rede com suas camadas (arquitetura da rede).
-
+        reg = 0.001
+        print('aqui')
         # padding='same' inclui uma borda na imagem de entrada para que a saída seja do mesmo tamanho da entrada após aplicado o fitro.
         # padding='valid' sem padding (a imagem de sáida será diminuída em relação à imagem de entrada).
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
         self.model.add(
-            Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel)))
+            Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel),  kernel_regularizer=regularizers.l2(reg)))
+        self.model.add(BatchNormalization())
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        self.model.add(Conv2D(32, (3, 3), padding='same'))
+        self.model.add(Conv2D(32, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
+        self.model.add(BatchNormalization())
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada de pooling para dividir pela metade a saída da camada anterior.
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
         # Cria camada de dropout para desligar neurônios.
         self.model.add(Dropout(0.25))
+        print('aqui1')
 
         # Cria camada convolucional com 64 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        self.model.add(Conv2D(64, (3, 3), padding='same'))
+        #self.model.add(Conv2D(64, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
+        #self.model.add(BatchNormalization())
         # Cria camada com função de ativação ReLU.
-        self.model.add(Activation('relu'))
+        #self.model.add(Activation('relu'))
         # Cria camada convolucional com 32 filtros de tramnho 3x3 com padding de tamanho que a saída seja do mesmo tamanho da entrada.
-        self.model.add(Conv2D(64, (3, 3)))
+        #self.model.add(Conv2D(64, (3, 3), padding='same', input_shape=(self.img_rows, self.img_cols, self.num_channel), kernel_regularizer=regularizers.l2(reg)))
+        #self.model.add(BatchNormalization())
         # Cria camada com função de ativação ReLU.
-        self.model.add(Activation('relu'))
+        #self.model.add(Activation('relu'))
         # Cria camada de pooling para dividir pela metade a saída da camada anterior.
-        self.model.add(MaxPooling2D(pool_size=(2, 2)))
+        #self.model.add(MaxPooling2D(pool_size=(2, 2)))
         # Cria camada de dropout para desligar neurônios.
-        self.model.add(Dropout(0.25))
+        #self.model.add(Dropout(0.25))
 
         # Converte as os mapas de características 3D para vetores de características (1D).
         self.model.add(Flatten())
         # Cria camada densa (fully connected) com 512 neurônios.
-        self.model.add(Dense(512))
+        self.model.add(Dense(128, kernel_regularizer=regularizers.l2(reg)))
+        self.model.add(BatchNormalization())
         # Cria camada com função de ativação ReLU.
         self.model.add(Activation('relu'))
         # Cria camada de dropout para desligar neurônios.
@@ -259,6 +248,38 @@ class CNN_XRayChest(object):
         self.model.add(Dense(self.num_classes))
         # Cria camada com função de ativação softmax para que a imagem seja classificada em uma das 10 classes definidas.
         self.model.add(Activation('softmax'))
+        print('aqui2')
+
+    def create_model2(self):
+        self.model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='Same',
+                         activation='relu', input_shape=input_shape))
+        self.model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='Same',
+                         activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        self.model.add(BatchNormalization())
+        self.model.add(Dropout(0.25))
+        self.model.add(Conv2D(filters=64, kernel_size=(3, 3), padding='Same',
+                         activation='relu'))
+        self.model.add(Conv2D(filters=64, kernel_size=(3, 3), padding='Same',
+                         activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        self.model.add(BatchNormalization())
+        self.model.add(Dropout(0.25))
+        self.model.add(Conv2D(filters=86, kernel_size=(3, 3), padding='Same',
+                         activation='relu'))
+        self.model.add(Conv2D(filters=86, kernel_size=(3, 3), padding='Same',
+                         activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        self.model.add(BatchNormalization())
+        self.model.add(Dropout(0.25))
+        self.model.add(Flatten())
+        # model.add(Dense(1024, activation = "relu"))
+        # model.add(Dropout(0.5))
+        self.model.add(Dense(512, activation="relu"))
+        self.model.add(Dropout(0.5))
+        self.model.add(Dense(self.num_classes, activation="softmax"))
+
+        # Define the optimizer
 
     def sumary_model(self):
         self.model.summary()
@@ -324,7 +345,7 @@ xray.load_dataset()
 xray.convert_class_one_hot_encoding()
 xray.convert_dataset()
 xray.split_dataset()
-# xray.create_model()
+#xray.create_model()
 xray.create_model1()
 print("Início: ", datetime.datetime.now())
 xray.sumary_model()

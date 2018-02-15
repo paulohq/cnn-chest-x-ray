@@ -50,8 +50,10 @@ class CNN_XRayChest(object):
 		#Define um dicionário com as classes e seus valores.
 		self.classes = {'Atelectasis': 0,  # 4212 *
 						'Effusion': 1,  # 3959 *
-						'Infiltration': 2,  # 9551 *
-						'Nodule': 3,  # 2706 *
+						'Cardiomegaly': 2,
+						'Pneumonia': 3,
+						#'Infiltration': 2,  # 9551 *
+						#'Nodule': 3,  # 2706 *
 						'Pneumothorax': 4  # 2199 *
 						}
 		#self.classes1 = {'Atelectasis': 1,			#4212 *
@@ -95,7 +97,8 @@ class CNN_XRayChest(object):
 
 	def open_CSV(self):
 		#Abre arquivo csv com o nome das imagens e suas respectivas classes.
-		with open('/content/image-class.csv', newline='') as csvfile:
+		#with open('/content/image-class.csv', newline='') as csvfile:
+		with open('/media/paulo/84DAF282DAF26FB2/paulo/RNP/dataset/X-ray-chest/image-class.csv', newline='') as csvfile:
 			reader = csv.DictReader(csvfile)
 			i = 0
 			# define um dicionario para armazenar o nome das imagens e as suas respectivas classes do arquivo csv.
