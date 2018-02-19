@@ -26,11 +26,14 @@ class CopyFile(object):
 
             # Laço que percorre os registros do arquivo csv e seta as listas de imagens e classes.
             for row in reader:
+
                 imagem = row['Image Index']
                 classe = row['Finding Label']
 
                 self.imagens.append(imagem)
                 self.classes.append(classe)
+                print(i,imagem + ' - ' + classe)
+                i = i + 1
 
     def copy_file(self):
         #self.classe = ""
@@ -38,10 +41,10 @@ class CopyFile(object):
         for dataset in self.data_dir_list:
 
             # Carrega as imagens do diretório.
-            img_list = os.listdir(self.data_path + '/' + dataset)
+            #img_list = os.listdir(self.data_path + '/' + dataset)
             # print ('Loaded the images of dataset-'+'{}\n'.format(dataset))
             # Percorre a lista de imagens para processá-las e adicioná-las à lista de imagens (img_data_list).
-            for img in img_list:
+            for img in self.imagens:
                 src = self.data_path + '/' + dataset + '/' + img
                 try:
                     # Recupera o índice da imagem na lista de imagens.
