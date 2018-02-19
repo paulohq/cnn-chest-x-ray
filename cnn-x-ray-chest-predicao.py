@@ -3,12 +3,14 @@ import numpy as np
 import os,cv2
 from keras.utils import np_utils
 from keras import backend as K
+import matplotlib.pylab as plt
 
 import csv
 
-
+#% matplotlib inline
 class predicao(object):
     def __init__(self):
+
         self.PATH = '/home/paulo/mestrado/dataset/x-ray-chest'
         self.data_path = self.PATH + '/data-1000'
         self.data_dir_list = os.listdir(self.data_path)
@@ -41,7 +43,7 @@ class predicao(object):
         self.imagens = []
         self.classes_imagens = []
 
-        self.lista_imagens_nome = []
+        self.lista_nome_imagens = []
 
     def open_CSV(self):
         # Abre arquivo csv com o nome das imagens e suas respectivas classes.
@@ -78,7 +80,7 @@ class predicao(object):
             # print ('Loaded the images of dataset-'+'{}\n'.format(dataset))
             # Percorre a lista de imagens para processá-las e adicioná-las à lista de imagens (img_data_list).
             for img in img_list:
-                self.lista_imagens_nome.append(img)
+                self.lista_nome_imagens.append(img)
 
                 input_img = cv2.imread(self.data_path + '/' + dataset + '/' + img)
                 input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
@@ -126,6 +128,23 @@ class predicao(object):
                 self.img_data = np.rollaxis(self.img_data, 3, 1)
                 #print(self.img_data.shape)
 
+    def plot_image(self):
+        for i in range(5):
+            nome_imagem = self.lista_nome_imagens[i]
+
+            input_img = cv2.imread(self.data_path + '/data/' + nome_imagem)
+
+            image = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+            image = cv2.resize(image, (512, 512))
+
+            # plt.figure(0)
+            # plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            # plt.show()
+            # plt.savefig('/tmp/imagem.png')
+            plt.imshow(image)
+            plt.axis('off')
+            plt.savefig('/tmp/' + nome_imagem)
+
     def predict(self):
         # carrega a arquitetura da rede.
         model_architecture = '/tmp/xray-chest_architecture.json'
@@ -146,7 +165,7 @@ class predicao(object):
         imgs = self.img_data[0:10]
 
         predictions = model.predict_classes(imgs)
-        print(self.lista_imagens_nome[0:10])
+        print(self.lista_nome_imagens[0:10])
         print(self.Y[0:10])
         # print('[0 1]')
         print(predictions)
@@ -156,4 +175,5 @@ pr.open_CSV()
 pr.load_dataset()
 pr.convert_class_one_hot_encoding()
 pr.convert_dataset()
+pr.plot_image()
 pr.predict()
