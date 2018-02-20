@@ -137,9 +137,9 @@ class predicao(object):
             image = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
             image = cv2.resize(image, (512, 512))
 
-            # plt.figure(0)
-            # plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            # plt.show()
+            #plt.figure(0)
+            #plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            #plt.show()
             # plt.savefig('/tmp/imagem.png')
             plt.imshow(image)
             plt.axis('off')
@@ -147,9 +147,9 @@ class predicao(object):
 
     def predict(self):
         # carrega a arquitetura da rede.
-        model_architecture = '/tmp/xray-chest_architecture.json'
+        model_architecture = '/home/paulo/PycharmProjects/cnn-chest-x-ray/xray-chest_architecture-89-perc.json'
         # carrega os pesos aprendidos pela rede no treinamento
-        model_weights = '/tmp/xray-chest_weights.h5'
+        model_weights = '/home/paulo/PycharmProjects/cnn-chest-x-ray/xray-chest_weights-89-perc.h5'
         # Lê o modelo
         model = model_from_json(open(model_architecture).read())
         # Lê os pesos
