@@ -1,9 +1,10 @@
 from keras.models import model_from_json
 import numpy as np
-import os,cv2
+import os, os.path, cv2
 from keras.utils import np_utils
 from keras import backend as K
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
+from glob import glob
 
 import csv
 
@@ -15,10 +16,21 @@ class predicao(object):
         self.data_path = self.PATH + '/data-1000'
         self.data_dir_list = os.listdir(self.data_path)
 
+        # simple version for working with CWD
+        #print
+        #len([name for name in os.listdir('.') if os.path.isfile(name)])
+
+        # path joining version for other paths
+        #DIR = self.data_path
+
+
+
         self.img_rows = 64
         self.img_cols = 64
         self.num_channel = 1
-        self.qtde_imagens = 1000
+        self.qtde_imagens = 1000 #len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+        self.qtde_imagens_predicao = 10
+
         # Lista com as imagens do dataset
         self.img_data_list = []
         self.img_data = []
@@ -129,6 +141,14 @@ class predicao(object):
                 #print(self.img_data.shape)
 
     def plot_image(self):
+
+        #imagens = []
+        #imagens[0] = ''
+        #imagens[1] = ''
+        #imagens[2] = ''
+        #imagens[3] = ''
+        #imagens[4] = ''
+
         for i in range(5):
             nome_imagem = self.lista_nome_imagens[i]
 
@@ -137,13 +157,14 @@ class predicao(object):
             image = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
             image = cv2.resize(image, (512, 512))
 
-            #plt.figure(0)
+            plt.figure(i)
             #plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            plt.title(nome_imagem + ' Classe: ' + self.classes_imagens[i])
             #plt.show()
             # plt.savefig('/tmp/imagem.png')
             plt.imshow(image)
-            plt.axis('off')
-            plt.savefig('/tmp/' + nome_imagem)
+            plt.show()
+
 
     def predict(self):
         # carrega a arquitetura da rede.
@@ -155,25 +176,73 @@ class predicao(object):
         # Lê os pesos
         model.load_weights(model_weights)
 
-        # carrega imagens para fazer a predição
-        # img_names = ['/home/paulo/mestrado/dataset/x-ray-chest/data/00000072_000.png', '/home/paulo/mestrado/dataset/x-ray-chest/data/00014149_018.png']
-        # imgs = [np.transpose(scipy.misc.imresize(scipy.misc.imread(img_name), (32, 32)),
-        #                     (1, 0, 2)).astype('float32')
-        #        for img_name in img_names]
-        # imgs = np.array(imgs) / 255
+        #nome_imagem =[]
+        #classes = []
+        #imgs = []
+        #data_path = '/home/paulo/mestrado/dataset/x-ray-chest/data-predicao/'
+        #nome_imagem.append('00000181_061.png')
+        #classes.append('Atelectasis')
+        #nome_imagem.append('00012973_005.png')
+        #classes.append('Effusion')
 
-        imgs = self.img_data[0:10]
+        #input_img = cv2.imread(data_path + nome_imagem[0])
+        #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+        #input_img_resize = cv2.resize(input_img, (self.img_rows, self.img_cols), interpolation=cv2.INTER_CUBIC)
+        #imgs.append(input_img_resize)
 
+        #input_img = cv2.imread(data_path + nome_imagem[1])
+        #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+        #input_img_resize = cv2.resize(input_img, (self.img_rows, self.img_cols), interpolation=cv2.INTER_CUBIC)
+        #imgs.append(input_img_resize)
+
+        #imgs = np.array(imgs)
+        #imgs = imgs.astype('float32')
+        # Normalize os valores dos pixels de 0 a 1 dividindo o valor original por 255
+        #imgs /= 255
+        #imgs = np.expand_dims(imgs, axis=4)
+
+        imgs = self.img_data[0:self.qtde_imagens_predicao]
+
+
+        #Faz a predição para as imagens do vetor.
         predictions = model.predict_classes(imgs)
-        print(self.lista_nome_imagens[0:10])
-        print(self.Y[0:10])
+
+        print('Predição:')
+        for i in range(self.qtde_imagens_predicao):
+
+            target = predictions[i]
+
+            for key, value in self.classes.items():
+                if value == target:
+                    predicao = key
+                    break
+            #print('Imagem: ' + self.lista_nome_imagens[i] + ' Classe: ' + predicao)
+
+            #Carrega a imagem
+            input_img = cv2.imread(self.data_path + '/data/' + self.lista_nome_imagens[i])
+            #input_img = cv2.imread(self.data_path + '/data/' + nome_imagem[i])
+            #input_img = cv2.imread(data_path + nome_imagem[i])
+            image = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+            #Faz o resize da imagem para 512x512
+            image = cv2.resize(image, (512, 512))
+
+            plt.figure(i)
+            plt.title(self.lista_nome_imagens[i] + ' Classe: ' + self.classes_imagens[i])
+            #plt.title(nome_imagem[i] + ' Classe: ' + classes[i])
+            plt.xlabel('Classe Predição: ' + predicao)
+            plt.imshow(image)
+            plt.show()
+
+        #print(self.lista_nome_imagens[0:5])
+        #print(self.Y[0:5])
         # print('[0 1]')
         print(predictions)
+
 
 pr = predicao()
 pr.open_CSV()
 pr.load_dataset()
 pr.convert_class_one_hot_encoding()
 pr.convert_dataset()
-pr.plot_image()
+#pr.plot_image()
 pr.predict()
