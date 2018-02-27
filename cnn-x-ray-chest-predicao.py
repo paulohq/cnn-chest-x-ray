@@ -5,6 +5,7 @@ from keras.utils import np_utils
 from keras import backend as K
 import matplotlib.pyplot as plt
 from glob import glob
+import random
 
 import csv
 
@@ -16,20 +17,11 @@ class predicao(object):
         self.data_path = self.PATH + '/data-1000'
         self.data_dir_list = os.listdir(self.data_path)
 
-        # simple version for working with CWD
-        #print
-        #len([name for name in os.listdir('.') if os.path.isfile(name)])
-
-        # path joining version for other paths
-        #DIR = self.data_path
-
-
-
         self.img_rows = 64
         self.img_cols = 64
         self.num_channel = 1
-        self.qtde_imagens = 1000 #len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
-        self.qtde_imagens_predicao = 10
+        self.qtde_imagens = 5000 #len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+        self.qtde_imagens_predicao = 4
 
         # Lista com as imagens do dataset
         self.img_data_list = []
@@ -54,11 +46,13 @@ class predicao(object):
         # Define listas para armazenar as imagens e suas respectivas classes para ser
         self.imagens = []
         self.classes_imagens = []
+        self.classes_predicao = []
 
         self.lista_nome_imagens = []
 
     def open_CSV(self):
         # Abre arquivo csv com o nome das imagens e suas respectivas classes.
+        #with open(self.PATH + '/lista-imagem-classe-1000.csv', newline='') as csvfile:
         with open(self.PATH + '/lista-imagem-classe-1000.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             i = 0
@@ -72,11 +66,9 @@ class predicao(object):
 
                 self.imagens.append(imagem)
                 self.classes_imagens.append(classe)
-            # imagens_classes[i] = row
-            # i = i + 1
-            # print(row['Image Index'], row['Finding Labels'])
 
-    def load_dataset(self):
+    def load_dataset2(self):
+
         self.img_data = np.array(self.img_data_list)
 
         # Recupera a quantidade de imagens do vetor img_data.
@@ -112,12 +104,50 @@ class predicao(object):
 
                 # Adiciona o rotulo encontrado no array de rótulos.
                 self.labels[i] = rotulo
+                print(classe)
+                #print(classe)
                 i += 1
+        print('aqui')
+        #self.img_data_list = random.sample(self.img_data_list, self.qtde_imagens_predicao)
+
+    def load_dataset(self):
+        #images = glob(os.path.basename(self.data_path + '/data/*.png'))
+        images = [os.path.basename(x) for x in glob(self.data_path + '/data/*.png')]
+        imagens_predicao = random.sample(images, self.qtde_imagens_predicao)
+
+        # Recupera a quantidade de imagens do vetor img_data.
+        numero_de_imagens = self.qtde_imagens_predicao
+        # Seta array de rótulos com a quantidade de imagens.
+        self.labels = np.ones((numero_de_imagens,), dtype='float')
+
+        i = 0
+        for img in imagens_predicao:
+            self.lista_nome_imagens.append(img)
+
+            input_img = cv2.imread(self.data_path + '/data/' +img)
+            input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+            input_img_resize = cv2.resize(input_img, (self.img_rows, self.img_cols), interpolation=cv2.INTER_CUBIC)
+            self.img_data_list.append(input_img_resize)
+
+            # Recupera o índice da imagem na lista de imagens.
+            image_index = self.imagens.index(img)
+            # Recupera a classe correspondente à imagem recuperada acima.
+            classe = self.classes_imagens[image_index]
+            # print(img, classe)
+            # Retorna o numero da classe para a descricao informada (key).
+            if classe not in self.classes:
+                rotulo = 0
+            else:
+                rotulo = self.classes[classe]
+
+            # Adiciona o rotulo encontrado no array de rótulos.
+            self.labels[i] = rotulo
+            self.classes_predicao.append(classe)
+            i += 1
+
     def convert_class_one_hot_encoding(self):
         # converte as classes para one-hot encoding
         self.Y = np_utils.to_categorical(self.labels)
-        #print(self.lista_imagens_nome )
-        #print(self.labels)
 
     def convert_dataset(self):
         # Transforma o tipo de dados de int para float32.
@@ -125,29 +155,18 @@ class predicao(object):
         self.img_data = self.img_data.astype('float32')
         # Normalize os valores dos pixels de 0 a 1 dividindo o valor original por 255
         self.img_data /= 255
-        #print(self.img_data.shape)
 
         if self.num_channel == 1:
             if K.image_dim_ordering() == 'th':
                 self.img_data = np.expand_dims(self.img_data, axis=1)
-                #print(self.img_data.shape)
             else:
                 self.img_data = np.expand_dims(self.img_data, axis=4)
-                #print(self.img_data.shape)
 
         else:
             if K.image_dim_ordering() == 'th':
                 self.img_data = np.rollaxis(self.img_data, 3, 1)
-                #print(self.img_data.shape)
 
     def plot_image(self):
-
-        #imagens = []
-        #imagens[0] = ''
-        #imagens[1] = ''
-        #imagens[2] = ''
-        #imagens[3] = ''
-        #imagens[4] = ''
 
         for i in range(5):
             nome_imagem = self.lista_nome_imagens[i]
@@ -158,10 +177,7 @@ class predicao(object):
             image = cv2.resize(image, (512, 512))
 
             plt.figure(i)
-            #plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
             plt.title(nome_imagem + ' Classe: ' + self.classes_imagens[i])
-            #plt.show()
-            # plt.savefig('/tmp/imagem.png')
             plt.imshow(image)
             plt.show()
 
@@ -176,33 +192,7 @@ class predicao(object):
         # Lê os pesos
         model.load_weights(model_weights)
 
-        #nome_imagem =[]
-        #classes = []
-        #imgs = []
-        #data_path = '/home/paulo/mestrado/dataset/x-ray-chest/data-predicao/'
-        #nome_imagem.append('00000181_061.png')
-        #classes.append('Atelectasis')
-        #nome_imagem.append('00012973_005.png')
-        #classes.append('Effusion')
-
-        #input_img = cv2.imread(data_path + nome_imagem[0])
-        #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-        #input_img_resize = cv2.resize(input_img, (self.img_rows, self.img_cols), interpolation=cv2.INTER_CUBIC)
-        #imgs.append(input_img_resize)
-
-        #input_img = cv2.imread(data_path + nome_imagem[1])
-        #input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-        #input_img_resize = cv2.resize(input_img, (self.img_rows, self.img_cols), interpolation=cv2.INTER_CUBIC)
-        #imgs.append(input_img_resize)
-
-        #imgs = np.array(imgs)
-        #imgs = imgs.astype('float32')
-        # Normalize os valores dos pixels de 0 a 1 dividindo o valor original por 255
-        #imgs /= 255
-        #imgs = np.expand_dims(imgs, axis=4)
-
-        imgs = self.img_data[0:self.qtde_imagens_predicao]
-
+        imgs = self.img_data
 
         #Faz a predição para as imagens do vetor.
         predictions = model.predict_classes(imgs)
@@ -216,26 +206,21 @@ class predicao(object):
                 if value == target:
                     predicao = key
                     break
-            #print('Imagem: ' + self.lista_nome_imagens[i] + ' Classe: ' + predicao)
 
             #Carrega a imagem
             input_img = cv2.imread(self.data_path + '/data/' + self.lista_nome_imagens[i])
-            #input_img = cv2.imread(self.data_path + '/data/' + nome_imagem[i])
-            #input_img = cv2.imread(data_path + nome_imagem[i])
             image = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
             #Faz o resize da imagem para 512x512
             image = cv2.resize(image, (512, 512))
 
             plt.figure(i)
-            plt.title(self.lista_nome_imagens[i] + ' Classe: ' + self.classes_imagens[i])
-            #plt.title(nome_imagem[i] + ' Classe: ' + classes[i])
-            plt.xlabel('Classe Predição: ' + predicao)
+            plt.title(self.lista_nome_imagens[i] + ' Classe: ' + self.classes_predicao[i])
+            plt.xlabel('Predição: ' + predicao)
+            #plt.subplot(self.qtde_imagens_predicao, 1, i + 1)
             plt.imshow(image)
             plt.show()
 
-        #print(self.lista_nome_imagens[0:5])
-        #print(self.Y[0:5])
-        # print('[0 1]')
+        print(self.Y)
         print(predictions)
 
 

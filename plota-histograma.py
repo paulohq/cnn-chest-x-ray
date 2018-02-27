@@ -3,7 +3,7 @@ import numpy as np
 import os
 from glob import glob
 import random
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import cv2
 import matplotlib.gridspec as gridspec
 #import seaborn as sns
@@ -23,24 +23,48 @@ image_name = images[0]
 def plotImage(image_location):
     image = cv2.imread(image_name)
     image = cv2.resize(image, (512,512))
-    #plt.figure(0)
+    plt.figure(0)
     #plt.plot(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    #plt.show()
+
     #plt.savefig('/tmp/imagem.png')
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.show()
     plt.axis('off')
     plt.savefig('/tmp/imagem.png')
 
-plotImage(image_name)
+#plotImage(image_name)
 
-r = random.sample(images, 3)
-plt.figure(figsize=(16,16))
-plt.subplot(131)
-plt.imshow(cv2.imread(r[0]))
-plt.subplot(132)
-plt.imshow(cv2.imread(r[1]))
-plt.subplot(133)
-plt.imshow(cv2.imread(r[2]));
+
+def plotMultipleImages():
+    # Plot Multiple Images
+    #xrays = glob('/kaggle/input/images_002/images/**')
+    i_ = 0
+    plt.rcParams['figure.figsize'] = (10.0, 10.0)
+    plt.subplots_adjust(wspace=0, hspace=0)
+    for l in images[:25]:
+        im = cv2.imread(l)
+        im = cv2.resize(im, (64, 64))
+        plt.subplot(5, 5, i_+1) #.set_title(l)
+        plt.imshow(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
+        plt.axis('off')
+        i_ += 1
+    plt.show()
+#plotMultipleImages()
+
+def plotRandomImages():
+    r = random.sample(images, 3)
+    i = 1
+    for l in r:
+        image = cv2.imread(l)
+        image = cv2.resize(image, (512, 512))
+        #plt.figure(figsize=(16,16))
+        plt.subplot(1,3, i)
+        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        i += 1
+
+    plt.show()
+
+plotRandomImages()
 
 def plotHistogram(a):
     """
