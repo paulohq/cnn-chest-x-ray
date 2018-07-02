@@ -31,3 +31,5 @@ downloaded.GetContentFile('data-10000.zip')
 !apt-get -qq install -y libsm6 libxext6 && pip install -q -U opencv-python
 # https://keras.io/
 !pip install -q keras
+
+#teste
